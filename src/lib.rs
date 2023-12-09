@@ -49,6 +49,27 @@ impl Field {
         return ((pos.0 + pos.1 * w) % (w * h)) as usize;
     }
 
+    /// 限制位置在 [`Field`] 范围内
+    /// 若超出, 则取最大/小值
+    fn limit(&self, pos: Pos) -> Pos {
+        let w = self.width as i32;
+        let h = self.height as i32;
+        let mut pos = pos;
+
+        if pos.0 < 0 {
+            pos.0 = 0;
+        } else if pos.0 >= w {
+            pos.0 = w - 1;
+        }
+
+        if pos.1 < 0 {
+            pos.1 = 0;
+        } else if pos.1 >= h {
+            pos.1 = h - 1;
+        }
+
+        return pos;
+    }
     /// 根据传入的方向移动两次
     /// 仅 [`u8`] 的后 4 bit 为有效方向
     /// - `00` LU
@@ -68,10 +89,8 @@ impl Field {
             dirs >>= 2;
         }
 
-        let w = self.width as i32;
-        let h = self.height as i32;
-        self.move_pnt.0 = self.move_pnt.0 % w + w;
-        self.move_pnt.1 = self.move_pnt.1 % h + h;
+        self.move_pnt = self.limit(self.move_pnt);
+
         return self.move_pnt;
     }
 }
