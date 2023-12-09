@@ -111,4 +111,17 @@ mod test {
         a += b;
         assert_eq!(a, Pos(3, 5));
     }
+
+    #[test]
+    fn test_field_init() {
+        let f = Field::new(17, 9);
+        assert_eq!(f.move_pnt, Pos(8, 4));
+    }
+
+    #[test]
+    fn test_field_index_and_pos() {
+        let f = Field::new(17, 9);
+        assert_eq!(f.pos_to_index(Pos(4, 7)), 123);
+        assert_eq!(f.index_to_pos(123), Pos(4, 7));
+    }
 }
