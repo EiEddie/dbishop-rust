@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign},
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct Pos(i32, i32);
 
 impl Add for Pos {
@@ -96,5 +96,19 @@ impl fmt::Display for Field {
         }
         write!(f, "+{}+\n", "-".repeat(self.width))?;
         return Ok(());
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn test_pos_add() {
+        let mut a = Pos(1, 2);
+        let b = Pos(2, 3);
+        assert_eq!(a + b, Pos(3, 5));
+        a += b;
+        assert_eq!(a, Pos(3, 5));
     }
 }
