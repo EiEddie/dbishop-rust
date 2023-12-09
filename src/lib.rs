@@ -23,7 +23,7 @@ impl AddAssign for Pos {
 struct Field {
     width: usize,
     height: usize,
-    val: Vec<i32>,
+    vals: Vec<i32>,
     move_pnt: Pos,
 }
 
@@ -32,7 +32,7 @@ impl Field {
         return Field {
             width,
             height,
-            val: vec![0; width * height],
+            vals: vec![0; width * height],
             move_pnt: Pos(width as i32 / 2, height as i32 / 2),
         };
     }
@@ -90,11 +90,16 @@ impl Field {
             };
             self.move_pnt = self.limit(self.move_pnt);
             let index = self.pos_to_index(self.move_pnt);
-            self.val[index] += 1;
+            self.vals[index] += 1;
             dirs >>= 2;
         }
 
         return self.move_pnt;
+    }
+
+    /// 获取指定点的途径次数
+    fn get_cnt(&self, pos: Pos) -> i32 {
+        return self.vals[self.pos_to_index(pos)];
     }
 }
 
@@ -105,14 +110,10 @@ impl fmt::Display for Field {
         ];
 
         write!(f, "+{}+\n", "-".repeat(self.width))?;
-        for y in 0..self.height {
+        for y in 0..self.height as i32 {
             write!(f, "|")?;
-            for x in 0..self.width {
-                write!(
-                    f,
-                    "{}",
-                    chars_list[self.val[self.pos_to_index(Pos(x as i32, y as i32))] as usize]
-                )?;
+            for x in 0..self.width as i32 {
+                write!(f, "{}", chars_list[self.get_cnt(Pos(x, y)) as usize])?;
             }
             write!(f, "|\n")?;
         }
