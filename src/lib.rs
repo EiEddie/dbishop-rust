@@ -156,9 +156,13 @@ mod test {
         // LU, LD
         f.pnt_move(8);
         assert_eq!(f.move_pnt, Pos(0, 2));
+        assert_eq!(f.get_cnt(Pos(1, 1)), 1);
+        assert_eq!(f.get_cnt(Pos(0, 2)), 1);
 
         // LU, LU
         f.pnt_move(0);
         assert_eq!(f.move_pnt, Pos(0, 0));
+        assert_eq!(f.get_cnt(Pos(0, 1)), 1);
+        assert_eq!(f.get_cnt(Pos(0, 0)), 1);
     }
 }
