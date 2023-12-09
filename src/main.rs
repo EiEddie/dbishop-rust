@@ -79,22 +79,22 @@ impl Field {
     /// - `10` LD
     /// - `11` RD
     fn pnt_move(&mut self, dirs: u8) -> Pos {
-        self.move_pnt += match dirs & 0b0011 {
-            0b0000 => Pos(-1, -1),
-            0b0001 => Pos(1, -1),
-            0b0010 => Pos(-1, 1),
-            0b0011 => Pos(1, 1),
-            _ => Pos(0, 0),
-        };
+        let mut dirs = dirs;
+        for _ in 0..2 {
+            self.move_pnt += match dirs & 0b11 {
+                0b00 => Pos(-1, -1),
+                0b01 => Pos(1, -1),
+                0b10 => Pos(-1, 1),
+                0b11 => Pos(1, 1),
+                _ => Pos(0, 0),
+            };
+            dirs >>= 2;
+        }
 
-        self.move_pnt += match dirs & 0b1100 {
-            0b0000 => Pos(-1, -1),
-            0b0100 => Pos(1, -1),
-            0b1000 => Pos(-1, 1),
-            0b1100 => Pos(1, 1),
-            _ => Pos(0, 0),
-        };
-
+        let w = self.width as i32;
+        let h = self.height as i32;
+        self.move_pnt.0 = self.move_pnt.0 % w + w;
+        self.move_pnt.1 = self.move_pnt.1 % h + h;
         return self.move_pnt;
     }
 }
