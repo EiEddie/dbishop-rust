@@ -70,6 +70,7 @@ impl Field {
 
         return pos;
     }
+
     /// 根据传入的方向移动两次
     /// 仅 [`u8`] 的后 4 bit 为有效方向
     /// - `00` LU
@@ -78,6 +79,7 @@ impl Field {
     /// - `11` RD
     fn pnt_move(&mut self, dirs: u8) -> Pos {
         let mut dirs = dirs;
+
         for _ in 0..2 {
             self.move_pnt += match dirs & 0b11 {
                 0b00 => Pos(-1, -1),
@@ -86,10 +88,11 @@ impl Field {
                 0b11 => Pos(1, 1),
                 _ => Pos(0, 0),
             };
+            self.move_pnt = self.limit(self.move_pnt);
+            let index = self.pos_to_index(self.move_pnt);
+            self.val[index] += 1;
             dirs >>= 2;
         }
-
-        self.move_pnt = self.limit(self.move_pnt);
 
         return self.move_pnt;
     }
