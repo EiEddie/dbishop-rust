@@ -143,4 +143,18 @@ mod test {
         assert_eq!(f.pos_to_index(Pos(4, 7)), 123);
         assert_eq!(f.index_to_pos(123), Pos(4, 7));
     }
+
+    #[test]
+    fn test_field_move() {
+        let mut f = Field::new(17, 9);
+        f.move_pnt = Pos(2, 2);
+
+        // LU, LD
+        f.pnt_move(8);
+        assert_eq!(f.move_pnt, Pos(0, 2));
+
+        // LU, LU
+        f.pnt_move(0);
+        assert_eq!(f.move_pnt, Pos(0, 0));
+    }
 }
