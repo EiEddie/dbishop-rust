@@ -61,7 +61,7 @@ struct Cli {
     data: Option<String>,
 
     /// Don't echo hex input
-    #[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetFalse)]
+    #[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
     is_quiet: bool,
 
     /// Use file, if '-' use stdin
@@ -69,7 +69,7 @@ struct Cli {
     file: Option<String>,
 
     /// Read the story of Bishop Peter
-    #[arg(long = "story", action = clap::ArgAction::SetFalse)]
+    #[arg(long = "story", action = clap::ArgAction::SetTrue)]
     is_story: bool,
 }
 
