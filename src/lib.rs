@@ -72,8 +72,9 @@ impl Field {
         return pos;
     }
 
-    /// 根据传入的方向移动两次
-    /// 仅 [`u8`] 的后 4 bit 为有效方向
+    /// 根据传入的方向移动 4 次
+    /// 每 2bits 一组, 自低位向高位移动四次
+    /// 方向如下
     /// - `00` LU
     /// - `01` RU
     /// - `10` LD
@@ -81,7 +82,7 @@ impl Field {
     fn pnt_move(&mut self, dirs: u8) -> Pos {
         let mut dirs = dirs;
 
-        for _ in 0..2 {
+        for _ in 0..4 {
             self.move_pnt += match dirs & 0b11 {
                 0b00 => Pos(-1, -1),
                 0b01 => Pos(1, -1),
@@ -137,68 +138,6 @@ pub fn fingerprint(seq: Vec<u8>) -> String {
     field.vals[idx_end] = 16;
 
     return field.to_string();
-}
-
-/// hex 字符串转换的错误类型
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum FromHexError {
-    /// 无效字符. 应为: `0...9`, `a...f` 或 `A...F`
-    InvalidHexCharacter { c: char, index: usize },
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FromHexError {}
-
-impl fmt::Display for FromHexError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            FromHexError::InvalidHexCharacter { c, index } => {
-                write!(f, "Invalid character {:?} at position {}", c, index)
-            }
-        }
-    }
-}
-
-/// 十六进制字符转十进制
-fn dec(chr: u8, index: usize) -> Result<u8, FromHexError> {
-    return match chr {
-        b'0'..=b'9' => Ok(chr - b'0'),
-        b'a'..=b'f' => Ok(chr - b'a' + 10),
-        b'A'..=b'F' => Ok(chr - b'A' + 10),
-        _ => Err(FromHexError::InvalidHexCharacter {
-            c: chr as char,
-            index,
-        }),
-    };
-}
-
-/// 将十六进制字符串中的字符依次翻译为十进制
-///
-/// # Examples
-///
-/// ```
-/// use dbishop::*;
-/// let ans: Vec<u8> = vec![0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,10,11,12,13,14,15];
-/// assert_eq!(
-///     decode(String::from("0123456789abcdefABCDEF")),
-///     Ok(ans)
-/// );
-/// assert_eq!(
-///     decode(String::from("g")),
-///     Err(FromHexError::InvalidHexCharacter{c: 'g', index: 0})
-/// );
-/// assert_eq!(
-///     decode(String::from("G")),
-///     Err(FromHexError::InvalidHexCharacter{c: 'G', index: 0})
-/// );
-/// ```
-pub fn decode(hex: String) -> Result<Vec<u8>, FromHexError> {
-    let mut ans: Vec<u8> = Vec::new();
-    for (i, chr) in hex.as_bytes().iter().enumerate() {
-        let dec = dec(*chr, i)?;
-        ans.push(dec);
-    }
-    return Ok(ans);
 }
 
 #[cfg(test)]
