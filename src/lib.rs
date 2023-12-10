@@ -51,6 +51,7 @@ impl Field {
     }
 
     /// 限制位置在 [`Field`] 范围内
+    ///
     /// 若超出, 则取最大/小值
     fn limit(&self, pos: Pos) -> Pos {
         let w = self.width as i32;
@@ -73,7 +74,8 @@ impl Field {
     }
 
     /// 根据传入的方向移动 4 次
-    /// 每 2bits 一组, 自低位向高位移动四次
+    ///
+    /// 每 2bits 一组, 自低位向高位移动四次,
     /// 方向如下
     /// - `00` LU
     /// - `01` RU
