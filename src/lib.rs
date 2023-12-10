@@ -3,6 +3,8 @@ use std::{
     ops::{Add, AddAssign},
 };
 
+mod error;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct Pos(i32, i32);
 

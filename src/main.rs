@@ -1,56 +1,8 @@
-use clap::{error::ErrorKind, CommandFactory, Parser};
-use core::fmt;
+use clap::{CommandFactory, Parser};
 use dbishop as db;
 use hex;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum DBishopError {
-    /// 输入为空
-    EmptyInput,
-
-    /// 输入的十六进制字符串始终应为偶数
-    OddHexInputLength,
-
-    /// 输入的十六进制字符串存在非法字符
-    WrongHexInputChar { c: char, i: usize },
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for DBishopError {}
-
-impl fmt::Display for DBishopError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        return match *self {
-            Self::EmptyInput => write!(f, "Input is empty."),
-            Self::OddHexInputLength => write!(f, "The number of digits is not even."),
-            Self::WrongHexInputChar { c, i } => {
-                write!(f, "Input string has a worng char `{}` in {}.", c, i)
-            }
-        };
-    }
-}
-
-impl From<hex::FromHexError> for DBishopError {
-    fn from(value: hex::FromHexError) -> Self {
-        return match value {
-            hex::FromHexError::OddLength => DBishopError::OddHexInputLength,
-            hex::FromHexError::InvalidHexCharacter { c, index } => {
-                DBishopError::WrongHexInputChar { c, i: index }
-            }
-            hex::FromHexError::InvalidStringLength => todo!(),
-        };
-    }
-}
-
-impl Into<ErrorKind> for DBishopError {
-    fn into(self) -> ErrorKind {
-        return match self {
-            DBishopError::EmptyInput => ErrorKind::MissingRequiredArgument,
-            DBishopError::OddHexInputLength => ErrorKind::InvalidValue,
-            DBishopError::WrongHexInputChar { .. } => ErrorKind::InvalidValue,
-        };
-    }
-}
+mod error;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -74,7 +26,7 @@ struct Cli {
     is_story: bool,
 }
 
-fn cli() -> Result<(), DBishopError> {
+fn cli() -> Result<(), error::DBishopError> {
     let cli = Cli::parse();
 
     #[cfg(debug_assertions)]
@@ -85,7 +37,7 @@ fn cli() -> Result<(), DBishopError> {
     }
 
     if cli.data == None && cli.file == None {
-        return Err(DBishopError::EmptyInput);
+        return Err(error::DBishopError::EmptyInput);
     }
 
     let seq = hex::decode(cli.data.as_ref().unwrap())?;
