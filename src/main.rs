@@ -1,5 +1,6 @@
-use clap::{error::ErrorKind, Parser};
+use clap::{error::ErrorKind, CommandFactory, Parser};
 use core::fmt;
+use dbishop as db;
 use hex;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -51,7 +52,7 @@ impl Into<ErrorKind> for DBishopError {
     }
 }
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(
     version,
     about = "The hash fingerprint visualization algorithm, like OpenSSH"
@@ -73,7 +74,32 @@ struct Cli {
     is_story: bool,
 }
 
-fn main() {
-    #[allow(unused_variables)]
+fn cli() -> Result<(), DBishopError> {
     let cli = Cli::parse();
+
+    #[cfg(debug_assertions)]
+    dbg!(&cli);
+
+    if cli.is_story {
+        todo!();
+    }
+
+    if cli.data == None && cli.file == None {
+        return Err(DBishopError::EmptyInput);
+    }
+
+    let seq = hex::decode(cli.data.as_ref().unwrap())?;
+    if !cli.is_quiet {
+        println!("fingerprint of `{}`:", cli.data.as_ref().unwrap());
+    }
+    print!("{}", db::fingerprint(seq));
+
+    return Ok(());
+}
+
+fn main() {
+    let mut cmd = Cli::command();
+    if let Err(e) = cli() {
+        cmd.error(e.into(), e.to_string()).exit();
+    }
 }
