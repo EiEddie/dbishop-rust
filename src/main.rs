@@ -13,7 +13,7 @@ struct Cli {
 	#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
 	is_quiet: bool,
 
-	/// Use file, if '-' use stdin
+	/// Use file, one single byte by one; if '-' use stdin
 	#[arg(short = 'i', long = "in")]
 	file: Option<String>,
 
