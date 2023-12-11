@@ -1,7 +1,6 @@
 use clap::{CommandFactory, Parser};
 use dbishop::error::*;
 use dbishop::gen;
-use hex;
 
 #[derive(Parser, Debug)]
 #[command(version,
@@ -23,7 +22,7 @@ struct Cli {
 	is_story: bool,
 }
 
-fn cli() -> Result<()> {
+fn run() -> Result<()> {
 	let cli = Cli::parse();
 
 	#[cfg(debug_assertions)]
@@ -33,22 +32,38 @@ fn cli() -> Result<()> {
 		todo!();
 	}
 
-	if cli.data == None && cli.file == None {
-		return Err(Error::EmptyInput);
-	}
+	return match (cli.data, cli.file) {
+		// 传入参数为空
+		(None, None) => Err(Error::EmptyInput),
 
-	let seq = hex::decode(cli.data.as_ref().unwrap())?;
-	if !cli.is_quiet {
-		println!("fingerprint of `{}`:", cli.data.as_ref().unwrap());
-	}
-	print!("{}", gen::fingerprint(seq));
+		// 仅传入文件, 输出文件指纹
+		(None, Some(file)) => {
+			let fp = gen::fp_of_file(&file)?;
+			if !cli.is_quiet {
+				println!("fingerprint of file `{}`:", file);
+			}
+			print!("{}", fp);
+			Ok(())
+		},
 
-	return Ok(());
+		// 仅传入十六进制字符串, 输出字符串指纹
+		(Some(data), None) => {
+			let fp = gen::fp_of_str(&data)?;
+			if !cli.is_quiet {
+				println!("fingerprint of hex `{}`:", data);
+			}
+			print!("{}", fp);
+			Ok(())
+		},
+
+		// 同时传入两者, 参数矛盾
+		(Some(_), Some(_)) => Err(Error::InputAndFileConflict),
+	};
 }
 
 fn main() {
 	let mut cmd = Cli::command();
-	if let Err(e) = cli() {
+	if let Err(e) = run() {
 		let msg = e.to_string();
 		cmd.error(e.into(), msg).exit();
 	}

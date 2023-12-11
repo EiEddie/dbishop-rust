@@ -1,5 +1,10 @@
-use std::fmt;
+use std::io::Read;
 use std::ops::{Add, AddAssign};
+use std::{fmt, fs};
+
+use hex;
+
+use crate::error::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct Pos(i32, i32);
@@ -136,6 +141,22 @@ pub fn fingerprint(seq: Vec<u8>) -> String {
 	field.vals[idx_end] = 16;
 
 	return field.to_string();
+}
+
+/// 文件的指纹
+///
+/// 依字节解析
+pub fn fp_of_file(path: &String) -> Result<String> {
+	let mut seq: Vec<u8> = Vec::new();
+	let mut file = fs::File::open(path)?;
+	file.read_to_end(&mut seq)?;
+	return Ok(fingerprint(seq));
+}
+
+/// 十六进制字符串的指纹
+pub fn fp_of_str(hex: &String) -> Result<String> {
+	let seq = hex::decode(hex)?;
+	return Ok(fingerprint(seq));
 }
 
 #[cfg(test)]
