@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{self, Read};
 use std::ops::{Add, AddAssign};
 use std::{fmt, fs};
 
@@ -148,8 +148,13 @@ pub fn fingerprint(seq: Vec<u8>) -> String {
 /// 依字节解析
 pub fn fp_of_file(path: &String) -> Result<String> {
 	let mut seq: Vec<u8> = Vec::new();
-	let mut file = fs::File::open(path)?;
-	file.read_to_end(&mut seq)?;
+	if path != "-" {
+		let mut file = fs::File::open(path)?;
+		file.read_to_end(&mut seq)?;
+	} else {
+		let mut stdin = io::stdin();
+		stdin.read_to_end(&mut seq)?;
+	}
 	return Ok(fingerprint(seq));
 }
 
