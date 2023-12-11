@@ -1,7 +1,7 @@
 use clap::{CommandFactory, Parser};
-use {dbishop as db, hex};
-
-mod error;
+use dbishop::error::*;
+use dbishop::gen;
+use hex;
 
 #[derive(Parser, Debug)]
 #[command(version,
@@ -23,7 +23,7 @@ struct Cli {
 	is_story: bool,
 }
 
-fn cli() -> Result<(), error::DBishopError> {
+fn cli() -> Result<()> {
 	let cli = Cli::parse();
 
 	#[cfg(debug_assertions)]
@@ -34,14 +34,14 @@ fn cli() -> Result<(), error::DBishopError> {
 	}
 
 	if cli.data == None && cli.file == None {
-		return Err(error::DBishopError::EmptyInput);
+		return Err(Error::EmptyInput);
 	}
 
 	let seq = hex::decode(cli.data.as_ref().unwrap())?;
 	if !cli.is_quiet {
 		println!("fingerprint of `{}`:", cli.data.as_ref().unwrap());
 	}
-	print!("{}", db::fingerprint(seq));
+	print!("{}", gen::fingerprint(seq));
 
 	return Ok(());
 }
@@ -49,6 +49,7 @@ fn cli() -> Result<(), error::DBishopError> {
 fn main() {
 	let mut cmd = Cli::command();
 	if let Err(e) = cli() {
-		cmd.error(e.into(), e.to_string()).exit();
+		let msg = e.to_string();
+		cmd.error(e.into(), msg).exit();
 	}
 }
