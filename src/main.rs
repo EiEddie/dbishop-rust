@@ -29,7 +29,19 @@ fn run() -> Result<()> {
 	dbg!(&cli);
 
 	if cli.is_story {
-		todo!();
+		print!(
+		       "Bishop Peter finds himself in the middle of an\nambient atrium. There are walls \
+		        on all four sides\nand apparently there is no exit. The floor is paved\nwith \
+		        square tiles, strictly alternating between\nblack and white. His head heavily \
+		        aching—probably\nfrom too much wine he had before—he starts\nwandering around \
+		        randomly. Well, to be exact, he\nonly makes diagonal steps—just like a bishop on \
+		        a\nchess board. When he hits a wall, he moves to the\nside, which takes him from \
+		        the black tiles to the\nwhite tiles (or vice versa). And after each move,\nhe \
+		        places a coin on the floor, to remember that he\nhas been there before. After 64 \
+		        steps, just when no\ncoins are left, Peter suddenly wakes up. What a\nstrange \
+		        dream!\n"
+		);
+		return Ok(());
 	}
 
 	return match (cli.data, cli.file) {
