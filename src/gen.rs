@@ -3,6 +3,7 @@ use std::ops::{Add, AddAssign};
 use std::{fmt, fs};
 
 use hex;
+use sha2::{self, Digest};
 
 use crate::error::*;
 
@@ -143,10 +144,23 @@ pub fn fingerprint(seq: Vec<u8>) -> String {
 	return field.to_string();
 }
 
+/// 文件 sha256 值的指纹
+pub fn fp_of_file_by_sha256(path: &String) -> Result<String> {
+	let mut hasher = sha2::Sha256::new();
+	if path != "-" {
+		let mut file = fs::File::open(path)?;
+		io::copy(&mut file, &mut hasher)?;
+	} else {
+		let mut stdin = io::stdin();
+		io::copy(&mut stdin, &mut hasher)?;
+	}
+	return Ok(fingerprint(hasher.finalize().to_vec()));
+}
+
 /// 文件的指纹
 ///
 /// 依字节解析
-pub fn fp_of_file(path: &String) -> Result<String> {
+pub fn fp_of_byte_on_file(path: &String) -> Result<String> {
 	let mut seq: Vec<u8> = Vec::new();
 	if path != "-" {
 		let mut file = fs::File::open(path)?;

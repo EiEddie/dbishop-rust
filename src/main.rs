@@ -1,25 +1,40 @@
-use clap::{CommandFactory, Parser};
+use clap::{CommandFactory, Parser, Subcommand};
 use dbishop::error::*;
 use dbishop::gen;
 
 #[derive(Parser, Debug)]
 #[command(version,
           about = "The hash fingerprint visualization algorithm, like OpenSSH")]
+#[command(propagate_version = true)]
 struct Cli {
-	/// Input data, like a hex string
-	data: Option<String>,
+	#[command(subcommand)]
+	command: Commands,
 
 	/// Don't echo hex input
 	#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
 	is_quiet: bool,
 
-	/// Use file, one single byte by one; if '-' use stdin
-	#[arg(short = 'i', long = "in")]
-	file: Option<String>,
-
 	/// Read the story of Bishop Peter
 	#[arg(long = "story", action = clap::ArgAction::SetTrue)]
 	is_story: bool,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+	/// Fingerprint of hex string
+	Str { data: String },
+
+	/// Fingerprint of a byte array
+	Byte {
+		#[arg(short = 'i', long = "in")]
+		file: String,
+	},
+
+	/// Fingerprint of a file, use md5
+	File {
+		#[arg(short = 'f', long = "file")]
+		file: String,
+	},
 }
 
 fn run() -> Result<()> {
@@ -44,33 +59,31 @@ fn run() -> Result<()> {
 		return Ok(());
 	}
 
-	return match (cli.data, cli.file) {
-		// 传入参数为空
-		(None, None) => Err(Error::EmptyInput),
-
-		// 仅传入文件, 输出文件指纹
-		(None, Some(file)) => {
-			let fp = gen::fp_of_file(&file)?;
-			if !cli.is_quiet {
-				println!("fingerprint of file `{}`:", file);
-			}
-			print!("{}", fp);
-			Ok(())
-		},
-
-		// 仅传入十六进制字符串, 输出字符串指纹
-		(Some(data), None) => {
+	let fp: String = match cli.command {
+		Commands::Str { data } => {
 			let fp = gen::fp_of_str(&data)?;
 			if !cli.is_quiet {
-				println!("fingerprint of hex `{}`:", data);
+				println!("fingerprint of str `{}`:", data);
 			}
-			print!("{}", fp);
-			Ok(())
+			fp
 		},
-
-		// 同时传入两者, 参数矛盾
-		(Some(_), Some(_)) => Err(Error::InputAndFileConflict),
+		Commands::Byte { file } => {
+			let fp = gen::fp_of_byte_on_file(&file)?;
+			if !cli.is_quiet {
+				println!("fingerprint of bytes on file `{}`:", file);
+			}
+			fp
+		},
+		Commands::File { file } => {
+			let fp = gen::fp_of_file_by_sha256(&file)?;
+			if !cli.is_quiet {
+				println!("fingerprint of sha256 on file `{}`:", file);
+			}
+			fp
+		},
 	};
+	print!("{}", fp);
+	Ok(())
 }
 
 fn main() {
