@@ -10,10 +10,6 @@ struct Cli {
 	#[command(subcommand)]
 	command: Commands,
 
-	/// Don't echo hex input
-	#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
-	is_quiet: bool,
-
 	/// Read the story of Bishop Peter
 	#[arg(long = "story", action = clap::ArgAction::SetTrue)]
 	is_story: bool,
@@ -22,18 +18,33 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
 	/// Fingerprint of hex string
-	Str { data: String },
+	Str {
+		/// Hex string
+		data: String,
+
+		/// Don't echo input
+		#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
+		is_quiet: bool,
+	},
 
 	/// Fingerprint of a byte array
 	Byte {
-		#[arg(short = 'i', long = "in")]
+		/// The byte array on file; if is `-` use stdin
 		file: String,
+
+		/// Don't echo input
+		#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
+		is_quiet: bool,
 	},
 
 	/// Fingerprint of a file, use md5
 	File {
-		#[arg(short = 'f', long = "file")]
+		/// The file; if is `-` use stdin
 		file: String,
+
+		/// Don't echo input
+		#[arg(short = 'q', long = "quiet", action = clap::ArgAction::SetTrue)]
+		is_quiet: bool,
 	},
 }
 
@@ -60,23 +71,23 @@ fn run() -> Result<()> {
 	}
 
 	let fp: String = match cli.command {
-		Commands::Str { data } => {
+		Commands::Str { data, is_quiet } => {
 			let fp = gen::fp_of_str(&data)?;
-			if !cli.is_quiet {
+			if !is_quiet {
 				println!("fingerprint of str `{}`:", data);
 			}
 			fp
 		},
-		Commands::Byte { file } => {
+		Commands::Byte { file, is_quiet } => {
 			let fp = gen::fp_of_byte_on_file(&file)?;
-			if !cli.is_quiet {
+			if !is_quiet {
 				println!("fingerprint of bytes on file `{}`:", file);
 			}
 			fp
 		},
-		Commands::File { file } => {
+		Commands::File { file, is_quiet } => {
 			let fp = gen::fp_of_file_by_sha256(&file)?;
-			if !cli.is_quiet {
+			if !is_quiet {
 				println!("fingerprint of sha256 on file `{}`:", file);
 			}
 			fp
