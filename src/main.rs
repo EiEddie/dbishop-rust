@@ -37,7 +37,7 @@ enum Commands {
 		is_quiet: bool,
 	},
 
-	/// Fingerprint of a file, use md5
+	/// Fingerprint of a file, use sha256
 	File {
 		/// The file; if is `-` use stdin
 		file: String,
